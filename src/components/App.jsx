@@ -1,9 +1,11 @@
+// src/components/App.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
 import Modal from './Modal';
 import Loader from './Loader';
+import { fetchImages } from '../services/api'; // Змінено шлях до файлу api.js
 import '../css/styles.css';
 
 const App = () => {
@@ -14,45 +16,38 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchImages = useCallback(() => {
+  const fetchImagesData = useCallback(async () => {
     if (!query) return;
-
-    const apiKey = '38418747-ec354076649bfa1b688ea2611';
-    const baseUrl = 'https://pixabay.com/api/';
-    const perPage = 12;
 
     setIsLoading(true);
 
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${baseUrl}?q=${query}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=${perPage}`
-        );
-        const data = await response.json();
+    try {
+      const data = await fetchImages(query, page);
 
-        if (page === 1) {
-          setImages(data.hits);
-        } else {
-          setImages((prevImages) => [...prevImages, ...data.hits]);
+      if (page === 1) {
+        setImages(data);
+      } else {
+        setImages((prevImages) => [...prevImages, ...data]);
+        const lastImageElement = document.getElementById(`image-${images.length + data.length - 1}`);
+
+
+        if (lastImageElement) {
           window.scrollTo({
-            top: document.documentElement.scrollHeight,
+            top: lastImageElement.offsetTop + lastImageElement.clientHeight,
             behavior: 'smooth',
           });
         }
-      } catch (error) {
-        console.error('Error fetching images:', error);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    fetchData();
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [query, page]);
 
   useEffect(() => {
-    fetchImages();
-
-  }, [fetchImages]);
+    fetchImagesData();
+  }, [fetchImagesData]);
 
   const handleInputChange = useCallback((value) => {
     setQuery(value);
@@ -68,7 +63,7 @@ const App = () => {
       setPage(1);
       setImages([]);
     } else {
-      fetchImages();
+      fetchImagesData();
     }
   };
 
@@ -91,9 +86,7 @@ const App = () => {
       <Searchbar query={query} onChange={handleInputChange} onSubmit={handleSubmit} />
       <ImageGallery images={images} onImageClick={handleImageClick} />
       {isLoading && <Loader />}
-      {images.length > 0 && !isLoading && (
-        <Button onClick={loadMoreImages} />
-      )}
+      {images.length > 0 && !isLoading && <Button onClick={loadMoreImages} />}
       {isModalOpen && <Modal largeImageURL={largeImageURL} onClose={handleCloseModal} />}
     </div>
   );
