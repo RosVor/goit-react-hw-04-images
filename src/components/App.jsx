@@ -28,15 +28,6 @@ const App = () => {
         setImages(data);
       } else {
         setImages((prevImages) => [...prevImages, ...data]);
-        const lastImageElement = document.getElementById(`image-${images.length + data.length - 1}`);
-
-
-        if (lastImageElement) {
-          window.scrollTo({
-            top: lastImageElement.offsetTop + lastImageElement.clientHeight,
-            behavior: 'smooth',
-          });
-        }
       }
     } catch (error) {
       console.error('Error fetching images:', error);
