@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import fetchImages from './api'; 
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
@@ -23,36 +24,17 @@ const App = () => {
     e.preventDefault();
     setPage(1);
     setImages([]);
+    fetchImages(query, 1, setImages, setPage, setTotalHits, setIsLoading);
   };
 
-  const fetchImages = useCallback(() => {
-    const apiKey = '38418747-ec354076649bfa1b688ea2611';
-    const baseUrl = 'https://pixabay.com/api/';
-    const perPage = 12;
-  
-    setIsLoading(true);
-  
-    fetch(
-      `${baseUrl}?q=${query}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=${perPage}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        if (page === 1) {
-          setImages(data.hits);
-        } else {
-          setImages((prevImages) => [...prevImages, ...data.hits]);
-        }
-        setPage((prevPage) => prevPage + 1);
-        setTotalHits(data.totalHits);
-      })
-      .catch((error) => console.error('Error fetching images:', error))
-      .finally(() => setIsLoading(false));
+  const fetchImagesCallback = useCallback(() => {
+    fetchImages(query, page, setImages, setPage, setTotalHits, setIsLoading);
   }, [query, page, setImages, setPage, setTotalHits, setIsLoading]);
-  
+
   useEffect(() => {
     const handleEnterPress = (e) => {
       if (e.key === 'Enter') {
-        fetchImages();
+        fetchImagesCallback();
       }
     };
 
@@ -61,7 +43,8 @@ const App = () => {
     return () => {
       window.removeEventListener('keydown', handleEnterPress);
     };
-  }, [query, page, fetchImages]);
+  }, [query, page, fetchImagesCallback]);
+
 
   const handleImageClick = (largeImageURL) => {
     setLargeImageURL(largeImageURL);
@@ -69,7 +52,7 @@ const App = () => {
   };
 
   const handleLoadMore = () => {
-    fetchImages();
+    fetchImagesCallback();
   };
 
   const handleCloseModal = () => {
@@ -85,10 +68,9 @@ const App = () => {
 
       {isLoading && <Loader />}
 
-      {images.length > 0 && images.length < totalHits && !isLoading && (
+            {images.length > 0 && images.length < totalHits && !isLoading && (
         <Button onClick={handleLoadMore} />
       )}
-
       {isModalOpen && <Modal largeImageURL={largeImageURL} onClose={handleCloseModal} />}
     </div>
   );

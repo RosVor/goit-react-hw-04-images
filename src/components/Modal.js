@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../css/styles.css';
 
 const Modal = ({ largeImageURL, onClose }) => {
+  useEffect(() => {
+    const handleEscapePress = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscapePress);
+
+    return () => {
+      window.removeEventListener('keydown', handleEscapePress);
+    };
+  }, [onClose]);
+
   const handleBackDropClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -17,6 +31,6 @@ const Modal = ({ largeImageURL, onClose }) => {
   );
 };
 
-
 export default Modal;
+
 
