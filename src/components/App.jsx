@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import fetchImages from './api'; 
+import React, { useState, useCallback } from 'react';
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
 import Modal from './Modal';
 import Loader from './Loader';
+import fetchImages from './api';
 import '../css/styles.css';
-
 const App = () => {
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
@@ -20,8 +19,7 @@ const App = () => {
     setQuery(value);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     setPage(1);
     setImages([]);
     fetchImages(query, 1, setImages, setPage, setTotalHits, setIsLoading);
@@ -30,21 +28,6 @@ const App = () => {
   const fetchImagesCallback = useCallback(() => {
     fetchImages(query, page, setImages, setPage, setTotalHits, setIsLoading);
   }, [query, page, setImages, setPage, setTotalHits, setIsLoading]);
-
-  useEffect(() => {
-    const handleEnterPress = (e) => {
-      if (e.key === 'Enter') {
-        fetchImagesCallback();
-      }
-    };
-
-    window.addEventListener('keydown', handleEnterPress);
-
-    return () => {
-      window.removeEventListener('keydown', handleEnterPress);
-    };
-  }, [query, page, fetchImagesCallback]);
-
 
   const handleImageClick = (largeImageURL) => {
     setLargeImageURL(largeImageURL);
@@ -68,9 +51,10 @@ const App = () => {
 
       {isLoading && <Loader />}
 
-            {images.length > 0 && images.length < totalHits && !isLoading && (
+      {images.length > 0 && images.length < totalHits && !isLoading && (
         <Button onClick={handleLoadMore} />
       )}
+
       {isModalOpen && <Modal largeImageURL={largeImageURL} onClose={handleCloseModal} />}
     </div>
   );

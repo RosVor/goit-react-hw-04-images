@@ -1,22 +1,18 @@
 import React, { useState } from 'react';
 
 const Searchbar = ({ query, onChange, onSubmit }) => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(query || ''); // 
 
   const handleChange = (e) => {
-    setSearch(e.target.value);
-    if (typeof onChange === 'function') {
-      onChange(e.target.value);
-    }
+    const value = e.target.value;
+    setSearch(value);
+    onChange && onChange(value); 
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (typeof onSubmit === 'function') {
-      onSubmit(e);
-    }
+    onSubmit && onSubmit(search); 
   };
-
 
   return (
     <header className="Searchbar">
