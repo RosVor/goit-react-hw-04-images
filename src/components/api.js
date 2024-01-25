@@ -11,6 +11,7 @@ const fetchImages = async (query, page, setImages, setPage, setTotalHits, setIsL
     );
 
     const data = await response.json();
+    console.log('Data from server:', data);
 
     if (page === 1) {
       setImages(data.hits);

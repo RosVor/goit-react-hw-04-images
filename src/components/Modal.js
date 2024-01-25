@@ -1,11 +1,10 @@
-// Modal.js
 import React, { useEffect } from 'react';
 
-const Modal = ({ largeImageURL, onClose, onRequestMore, query, page }) => {
+const Modal = ({ largeImageURL, onClose, query, page }) => {
   useEffect(() => {
     const handleEnterPress = (e) => {
       if (e.key === 'Enter') {
-        onRequestMore(query, page);
+        onClose();
       }
     };
 
@@ -14,7 +13,7 @@ const Modal = ({ largeImageURL, onClose, onRequestMore, query, page }) => {
     return () => {
       window.removeEventListener('keydown', handleEnterPress);
     };
-  }, [onRequestMore, query, page]);
+  }, [onClose]);
 
   const handleBackDropClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -32,6 +31,8 @@ const Modal = ({ largeImageURL, onClose, onRequestMore, query, page }) => {
 };
 
 export default Modal;
+
+
 
 
 
