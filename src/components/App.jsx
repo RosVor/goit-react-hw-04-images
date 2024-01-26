@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
@@ -8,7 +8,6 @@ import fetchImages from './api';
 import '../css/styles.css';
 
 const App = () => {
-  const [shouldFetchImages, setShouldFetchImages] = useState(false);
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
@@ -17,33 +16,29 @@ const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [totalHits, setTotalHits] = useState(0);
 
-  const fetchImagesCallback = useCallback(() => {
-    setIsLoading(true);
-    fetchImages(query, page, setImages, setPage, setTotalHits, setIsLoading);
-  }, [query, page, setImages, setPage, setTotalHits, setIsLoading]);
-
   const handleInputChange = (value) => {
     setQuery(value);
-    setShouldFetchImages(false);
   };
 
   const handleSubmit = () => {
     setPage(1);
     setImages([]);
-    setShouldFetchImages(true);
   };
 
-  const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1);
-    setShouldFetchImages(true);
-  };
+  const handleLoadMore = async () => {
+    try {
+      setIsLoading(true);
+      const data = await fetchImages(query, page + 1);
 
-  useEffect(() => {
-    if (shouldFetchImages) {
-      fetchImagesCallback();
-      setShouldFetchImages(false);
+      setImages((prevImages) => [...prevImages, ...data.hits]);
+      setPage((prevPage) => prevPage + 1);
+      setTotalHits(data.totalHits);
+    } catch (error) {
+      console.error('Error fetching more images:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [shouldFetchImages, fetchImagesCallback]);
+  };
 
   const handleImageClick = (largeImageURL) => {
     setLargeImageURL(largeImageURL);
@@ -54,6 +49,32 @@ const App = () => {
     setLargeImageURL('');
     setIsModalOpen(false);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchImages(query, page);
+
+        if (page === 1) {
+          setImages(data.hits);
+        } else {
+          setImages((prevImages) => [...prevImages, ...data.hits]);
+        }
+
+        setPage((prevPage) => prevPage + 1);
+        setTotalHits(data.totalHits);
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (query && page === 1) {
+      fetchData();
+    }
+  }, [query, page]);
 
   return (
     <div className="App">
