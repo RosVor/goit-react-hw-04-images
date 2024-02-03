@@ -16,29 +16,15 @@ const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [totalHits, setTotalHits] = useState(0);
 
-  const handleInputChange = (value) => {
+  const handleSubmit = (value) => {
+    setPage(1);
+    setImages([]);
     setQuery(value);
   };
 
-  const handleSubmit = () => {
-    setPage(1);
-    setImages([]);
-  };
-
-  const handleLoadMore = async () => {
-    try {
-      setIsLoading(true);
-      const data = await fetchImages(query, page + 1);
-
-      setImages((prevImages) => [...prevImages, ...data.hits]);
-      setPage((prevPage) => prevPage + 1);
-      setTotalHits(data.totalHits);
-    } catch (error) {
-      console.error('Error fetching more images:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleLoadMore =  () => {
+    setPage((prevPage) => prevPage + 1);
+};
 
   const handleImageClick = (largeImageURL) => {
     setLargeImageURL(largeImageURL);
@@ -55,14 +41,8 @@ const App = () => {
       try {
         setIsLoading(true);
         const data = await fetchImages(query, page);
-
-        if (page === 1) {
-          setImages(data.hits);
-        } else {
           setImages((prevImages) => [...prevImages, ...data.hits]);
-        }
-
-        setPage((prevPage) => prevPage + 1);
+  
         setTotalHits(data.totalHits);
       } catch (error) {
         console.error('Error fetching images:', error);
@@ -71,14 +51,14 @@ const App = () => {
       }
     };
 
-    if (query && page === 1) {
+    if (query ) {
       fetchData();
     }
   }, [query, page]);
 
   return (
     <div className="App">
-      <Searchbar query={query} onChange={handleInputChange} onSubmit={handleSubmit} />
+      <Searchbar query={query} onSubmit={handleSubmit} />
 
       <ImageGallery images={images} onImageClick={handleImageClick} />
 
@@ -94,4 +74,3 @@ const App = () => {
 };
 
 export { App };
-
